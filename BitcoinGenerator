@@ -1,0 +1,96 @@
+# You can generate a random Bitcoin address using the pycryptodome library in Python:
+
+from Crypto.PublicKey import RSA
+
+# Generate a new RSA key
+key = RSA.generate(2048)
+
+# Extract the public key in PEM format
+public_key = key.publickey().exportKey("PEM")
+
+# Generate a Bitcoin address from the public key
+from hashlib import sha256
+
+# Perform double SHA-256 hash of the public key
+public_key_hash = sha256(sha256(public_key).digest()).digest()
+
+# Perform RIPEMD-160 hash of the double SHA-256 hash
+from hashlib import new as newhashlib
+
+ripemd160 = newhashlib('ripemd160')
+ripemd160.update(public_key_hash)
+public_key_hash = ripemd160.digest()
+
+# Add the Bitcoin network prefix
+public_key_hash = b'\x00' + public_key_hash
+
+# Perform double SHA-256 hash of the prefix+RIPEMD-160 hash
+checksum = sha256(sha256(public_key_hash).digest()).digest()[:4]
+
+# Concatenate the prefix+RIPEMD-160 hash+checksum to get the final address
+address = public_key_hash + checksum
+
+# Encode the address in Base58
+from base58 import b58encode
+
+address = b58encode(address)
+print(address)
+
+
+# This code generates a new RSA key, extracts the public key in PEM format, performs a series of hashes on the public key to generate a Bitcoin address, and then encodes the address in Base58.
+
+# It is important to note that this is just an example and there are other ways to generate a Bitcoin address. Also, generating a new address for every transaction is not recommended, it is better to use a deterministic wallet and generate new addresses from a seed phrase.
+
+# Also, it's worth mentioning that this script generates an address that is not associated to any private key and so it is not capable of signing or spending any funds. To generate a real address you would need to associate a private key with the generated public key.
+
+
+
+# Here is an example of how you can associate a private key with the generated public key in order to create a valid Bitcoin address:
+
+from Crypto.PublicKey import RSA
+
+# Generate a new RSA key
+key = RSA.generate(2048)
+
+# Extract the public key in PEM format
+public_key = key.publickey().exportKey("PEM")
+
+# Extract the private key in PEM format
+private_key = key.exportKey("PEM")
+
+# Generate a Bitcoin address from the public key
+from hashlib import sha256
+
+# Perform double SHA-256 hash of the public key
+public_key_hash = sha256(sha256(public_key).digest()).digest()
+
+# Perform RIPEMD-160 hash of the double SHA-256 hash
+from hashlib import new as newhashlib
+
+ripemd160 = newhashlib('ripemd160')
+ripemd160.update(public_key_hash)
+public_key_hash = ripemd160.digest()
+
+# Add the Bitcoin network prefix
+public_key_hash = b'\x00' + public_key_hash
+
+# Perform double SHA-256 hash of the prefix+RIPEMD-160 hash
+checksum = sha256(sha256(public_key_hash).digest()).digest()[:4]
+
+# Concatenate the prefix+RIPEMD-160 hash+checksum to get the final address
+address = public_key_hash + checksum
+
+# Encode the address in Base58
+from base58 import b58encode
+
+address = b58encode(address)
+
+print("Bitcoin Address: ", address)
+print("Private Key: ", private_key)
+
+
+# In this example, the private key is generated along with the public key using the RSA key pair generation. The private key is then exported in PEM format.
+
+# It's important to keep your private key safe and secure, as it can be used to spend any funds associated with the address.
+
+# It's also worth mentioning that Bitcoin addresses are not only associated with RSA key pairs, but other types of key pairs can be used to generate Bitcoin addresses such as ECDSA and EdDSA, and each one has its own advantages and disadvantages.
